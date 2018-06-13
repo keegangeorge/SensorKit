@@ -1,18 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/parent_layout"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:id="@+id/parent_layout">
+    android:layout_height="wrap_content">
 
 
     <TextView
+        android:id="@+id/list_item"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Dummy Text"
-        android:id="@+id/list_item"
         android:layout_centerVertical="true"
         android:layout_marginLeft="30dp"
         android:layout_marginTop="30dp"
-        android:textSize="17sp"/>
+        android:text="Dummy Text"
+        android:textSize="17sp" />
 </RelativeLayout>
