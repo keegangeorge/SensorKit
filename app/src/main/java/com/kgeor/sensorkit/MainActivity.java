@@ -1,5 +1,7 @@
 package com.kgeor.sensorkit;
 
+import android.hardware.Sensor;
+import android.hardware.SensorManager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
@@ -7,16 +9,24 @@ import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * @author Keegan George
  * @version 1.0
  */
 public class MainActivity extends AppCompatActivity {
+    // GENERAL FIELDS //
     private static final String TAG = "MainActivity";
 
-    // FIELDS //
-    private ArrayList<String> mNames = new ArrayList<>();
+    // RECYCLER VIEW FIELDS //
+    private RecyclerView mRecyclerView;
+    private RecyclerViewAdapter mAdapter;
+    private RecyclerView.LayoutManager mLayoutManager;
+    private ArrayList<String> mSensorNames = new ArrayList<>();
+
+    // SENSOR FIELDS //
+    SensorManager mySensorManager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -24,37 +34,38 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         Log.d(TAG, "onCreate: started.");
-        initItemNames();
 
-    }
+        // reference to sensor and attach listener (acquire later - release early)
+        mySensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
 
-    private void initItemNames() {
-        mNames.add("Accelerometer");
-        mNames.add("This is sensor 2");
-        mNames.add("This is sensor 3");
-        mNames.add("This is sensor 4");
-        mNames.add("This is sensor 5");
-        mNames.add("This is sensor 6");
-        mNames.add("This is sensor 7");
-        mNames.add("This is sensor 8");
-        mNames.add("This is sensor 9");
-        mNames.add("This is sensor 10");
-        mNames.add("This is sensor 11");
-        mNames.add("This is sensor 12");
-        mNames.add("This is sensor 13");
-        mNames.add("This is sensor 14");
-        mNames.add("This is sensor 15");
-        mNames.add("This is sensor 16");
-        mNames.add("This is sensor 17");
+        List<Sensor> mSensorList = mySensorManager.getSensorList(Sensor.TYPE_ALL);
+
+
+        // Add sensors to recycler view list
+        for (int i = 0; i < mSensorList.size(); i++) {
+            mSensorNames.add(mSensorList.get(i).getName());
+        }
+
         initRecyclerView();
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+    }
+
+    @Override
+    protected  void onPause() {
+        super.onPause();
+    }
+
+
     private void initRecyclerView() {
         Log.d(TAG, "initRecyclerView: init recyclerview.");
-        RecyclerView recyclerView = findViewById(R.id.recycler_view);
-        RecyclerViewAdapter adapter = new RecyclerViewAdapter(this, mNames);
-        recyclerView.setAdapter(adapter);
-        recyclerView.setLayoutManager(new LinearLayoutManager(this));
-
+        mRecyclerView = findViewById(R.id.recycler_view);
+        mAdapter = new RecyclerViewAdapter(this, mSensorNames);
+        mRecyclerView.setAdapter(mAdapter);
+        mLayoutManager = new LinearLayoutManager(this);
+        mRecyclerView.setLayoutManager(mLayoutManager);
     }
 }

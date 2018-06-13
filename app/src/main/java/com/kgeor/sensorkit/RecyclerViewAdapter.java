@@ -13,21 +13,26 @@ import android.widget.Toast;
 
 import java.util.ArrayList;
 
+/**
+ * @author Keegan George
+ * @version 1.0
+ */
 public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapter.ViewHolder> {
-
+    // FIELDS //
     public static final String TAG = "RecyclerViewAdapter";
-    private ArrayList<String> mListItems = new ArrayList<>();
+    private ArrayList<String> mListItems;
     private Context mContext;
 
     public RecyclerViewAdapter(Context mContext, ArrayList<String> mListItems) {
-        this.mListItems = mListItems;
         this.mContext = mContext;
+        this.mListItems = mListItems;
     }
 
     @NonNull
     @Override
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.layout_listitem, parent, false);
+        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.layout_listitem,
+                parent, false);
         ViewHolder holder = new ViewHolder(view);
         return holder;
     }
