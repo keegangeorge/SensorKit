@@ -1,52 +1,92 @@
 package com.kgeor.sensorkit;
 
-import android.hardware.Sensor;
-import android.hardware.SensorManager;
+
+import android.support.annotation.NonNull;
+import android.support.design.widget.BottomNavigationView;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
 import android.util.Log;
+import android.view.MenuItem;
+import android.widget.FrameLayout;
 
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * @author Keegan George
  * @version 1.0
  */
 public class MainActivity extends AppCompatActivity {
-    // GENERAL FIELDS //
+    // FIELDS //
     private static final String TAG = "MainActivity";
-
-    // RECYCLER VIEW FIELDS //
-    private RecyclerView mRecyclerView;
-    private RecyclerViewAdapter mAdapter;
-    private RecyclerView.LayoutManager mLayoutManager;
-    private ArrayList<String> mSensorNames = new ArrayList<>();
-
-    // SENSOR FIELDS //
-    SensorManager mySensorManager;
+    private BottomNavigationView mMainNav;
+    private FrameLayout mMainFrame;
+    private HomeFragment homeFragment;
+    private EnviroFragment environmentFragment;
+    private LightFragment lightFragment;
+    private MoveFragment movementFragment;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        Log.d(TAG, "onCreate: started."); // TODO Remove before deployment
 
-        Log.d(TAG, "onCreate: started.");
+        mMainFrame = findViewById(R.id.main_frame);
+        mMainNav = findViewById(R.id.main_nav);
 
-        // reference to sensor and attach listener (acquire later - release early)
-        mySensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
+        homeFragment = new HomeFragment();
+        environmentFragment = new EnviroFragment();
+        lightFragment = new LightFragment();
+        movementFragment = new MoveFragment();
 
-        List<Sensor> mSensorList = mySensorManager.getSensorList(Sensor.TYPE_ALL);
+        setFragment(homeFragment);
+
+        mMainNav.setOnNavigationItemSelectedListener(new BottomNavigationView.OnNavigationItemSelectedListener() {
+            @Override
+            public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+
+                switch (item.getItemId()) {
+
+                    case R.id.nav_home:
+                        mMainNav.setItemBackgroundResource(R.color.colorPrimary);
+                        setFragment(homeFragment);
+                        return true;
+
+                    case R.id.nav_environment:
+                        mMainNav.setItemBackgroundResource(R.color.colorPrimary);
+                        setFragment(environmentFragment);
+                        return true;
 
 
-        // Add sensors to recycler view list
-        for (int i = 0; i < mSensorList.size(); i++) {
-            mSensorNames.add(mSensorList.get(i).getName());
-        }
+                    case R.id.nav_light:
+                        mMainNav.setItemBackgroundResource(R.color.colorPrimary);
+                        setFragment(lightFragment);
+                        return true;
 
-        initRecyclerView();
+
+                    case R.id.nav_movement:
+                        mMainNav.setItemBackgroundResource(R.color.colorPrimary);
+                        setFragment(movementFragment);
+                        return true;
+
+                    default:
+                        return false;
+                }
+            }
+
+
+        });
+
+
+    } // onCreate() end
+
+
+    private void setFragment(Fragment fragment) {
+        FragmentTransaction fragmentTransaction;
+        fragmentTransaction = getSupportFragmentManager().beginTransaction();
+        fragmentTransaction.replace(R.id.main_frame, fragment);
+        fragmentTransaction.commit();
     }
 
     @Override
@@ -55,17 +95,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     @Override
-    protected  void onPause() {
+    protected void onPause() {
         super.onPause();
-    }
-
-
-    private void initRecyclerView() {
-        Log.d(TAG, "initRecyclerView: init recyclerview.");
-        mRecyclerView = findViewById(R.id.recycler_view);
-        mAdapter = new RecyclerViewAdapter(this, mSensorNames);
-        mRecyclerView.setAdapter(mAdapter);
-        mLayoutManager = new LinearLayoutManager(this);
-        mRecyclerView.setLayoutManager(mLayoutManager);
     }
 }
