@@ -1,30 +1,32 @@
 package com.kgeor.sensorkit.model;
 
-import java.util.UUID;
 
+/**
+ * DataItem class to get data values for recycler view
+ *
+ * @author Keegan George
+ * @version 1.0
+ */
 public class DataItem {
-
-    private String itemId;
+    // FIELDS //
+    private int itemId;
     private String itemName;
 
+    // CONSTRUCTOR //
     public DataItem() {
     }
 
-    public DataItem(String itemId, String itemName) {
-        // when creating a new object without UUID, assign it one
-        if (itemId == null) {
-            itemId = UUID.randomUUID().toString();
-        }
-
+    // METHODS //
+    public DataItem(int itemId, String itemName) {
         this.itemId = itemId;
         this.itemName = itemName;
     }
 
-    public String getItemId() {
+    public int getItemId() {
         return itemId;
     }
 
-    public void setItemId(String itemId) {
+    public void setItemId(int itemId) {
         this.itemId = itemId;
     }
 
