@@ -1,109 +1,132 @@
 package com.kgeor.sensorkit;
 
+
 import android.content.Context;
-import android.net.Uri;
+import android.hardware.Sensor;
+import android.hardware.SensorEvent;
+import android.hardware.SensorEventListener;
+import android.hardware.SensorManager;
 import android.os.Bundle;
+import android.os.Vibrator;
+import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.TextView;
+import android.widget.ImageView;
+import android.widget.Toast;
+
 
 /**
+ * Class responsible for the vibration / device on table fragment
+ *
+ * @author Keegan George
+ * @version 1.0
  * A simple {@link Fragment} subclass.
- * Activities that contain this fragment must implement the
- * {@link VibrationFragment.OnFragmentInteractionListener} interface
- * to handle interaction events.
- * Use the {@link VibrationFragment#newInstance} factory method to
- * create an instance of this fragment.
  */
-public class VibrationFragment extends Fragment {
-    // TODO: Rename parameter arguments, choose names that match
-    // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-    private static final String ARG_PARAM1 = "param1";
-    private static final String ARG_PARAM2 = "param2";
+public class VibrationFragment extends Fragment implements SensorEventListener {
+    // FIELDS //
+    private SensorManager mSensorManager = null;
+    private Sensor mAccelerometer = null;
+    private ImageView vibratingImg, nonVibratingImg; // image of vibrating device
+    private boolean isFlat = false; // state of device being flat on table
+    float[] accValues = new float[3]; // values from accelerometer
+    Vibrator vibration; // reference to vibration motor
 
-    // TODO: Rename and change types of parameters
-    private String mParam1;
-    private String mParam2;
-
-    private OnFragmentInteractionListener mListener;
-
+    // CONSTRUCTOR //
     public VibrationFragment() {
         // Required empty public constructor
     }
 
-    /**
-     * Use this factory method to create a new instance of
-     * this fragment using the provided parameters.
-     *
-     * @param param1 Parameter 1.
-     * @param param2 Parameter 2.
-     * @return A new instance of fragment VibrationFragment.
-     */
-    // TODO: Rename and change types and number of parameters
-    public static VibrationFragment newInstance(String param1, String param2) {
-        VibrationFragment fragment = new VibrationFragment();
-        Bundle args = new Bundle();
-        args.putString(ARG_PARAM1, param1);
-        args.putString(ARG_PARAM2, param2);
-        fragment.setArguments(args);
-        return fragment;
-    }
+    // METHODS //
 
+    /**
+     * Initializes values on fragment creation
+     */
     @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        if (getArguments() != null) {
-            mParam1 = getArguments().getString(ARG_PARAM1);
-            mParam2 = getArguments().getString(ARG_PARAM2);
-        }
+    public void onActivityCreated(@Nullable Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
+
+        // link XML to Java
+        vibratingImg = getActivity().findViewById(R.id.vibration_image);
+        nonVibratingImg = getActivity().findViewById(R.id.not_vibration_image);
+
+        // acquire sensors
+        mSensorManager = (SensorManager) getActivity().getSystemService(Context.SENSOR_SERVICE);
+        mAccelerometer = mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        TextView textView = new TextView(getActivity());
-        textView.setText(R.string.hello_blank_fragment);
-        return textView;
+        // Inflate the layout for this fragment
+        return inflater.inflate(R.layout.fragment_vibrate, container, false);
     }
 
-    // TODO: Rename method, update argument and hook method into UI event
-    public void onButtonPressed(Uri uri) {
-        if (mListener != null) {
-            mListener.onFragmentInteraction(uri);
+    @Override
+    public void onResume() {
+        super.onResume();
+        // update action bar title
+        ((MainActivity) getActivity()).setActionBarTitle("Vibration Sensor");
+
+        // register accelerometer sensor (acquire late)
+        mSensorManager.registerListener(this, mAccelerometer, SensorManager.SENSOR_DELAY_NORMAL);
+    }
+
+    @Override
+    public void onPause() {
+        // release sensor (release early)
+        mSensorManager.unregisterListener(this);
+        super.onPause();
+    }
+
+    @Override
+    public void onSensorChanged(SensorEvent event) {
+        // reference to type of sensor
+        int type = event.sensor.getType();
+
+        if (type == Sensor.TYPE_ACCELEROMETER) {
+            accValues = event.values;
+
+            /* if device is flat display phone vibrating image
+             * if device is not flat display regular phone image
+             */
+            if (isFlat) {
+                vibratingImg.setVisibility(View.VISIBLE);
+                nonVibratingImg.setVisibility(View.INVISIBLE);
+            } else if (!isFlat) {
+                vibratingImg.setVisibility(View.INVISIBLE);
+                nonVibratingImg.setVisibility(View.VISIBLE);
+            }
+
+            // Device is flat, begin vibration
+            if (accValues[0] < 0.3 && accValues[1] < 0.3 && accValues[2] > 9.6 && !isFlat) {
+                isFlat = true;
+
+                vibration = (Vibrator) getActivity().getSystemService(Context.VIBRATOR_SERVICE);
+
+                if (vibration.hasVibrator()) {
+                    // Vibrate for 5000 milliseconds
+                    vibration.vibrate(5000);
+                    // Display message to user when device is flat
+                    Toast.makeText(this.getActivity(), "Device Flat - Beep", Toast.LENGTH_SHORT).show();
+                } else {
+                    //Else display a toast "No Vibrator - Device Flat"
+                    Toast.makeText(this.getActivity(), "Vibrator Unavailable but Device is Flat", Toast.LENGTH_SHORT).show();
+                }
+
+            } else if (((accValues[0] > 3.0 || accValues[1] > 3.0) && accValues[2] < 8.0) && isFlat) {
+                isFlat = false;
+
+            }
+
         }
     }
 
     @Override
-    public void onAttach(Context context) {
-        super.onAttach(context);
-        if (context instanceof OnFragmentInteractionListener) {
-            mListener = (OnFragmentInteractionListener) context;
-        } else {
-            throw new RuntimeException(context.toString()
-                    + " must implement OnFragmentInteractionListener");
-        }
-    }
+    public void onAccuracyChanged(Sensor sensor, int accuracy) {
+        // TODO Auto-generated method stub
 
-    @Override
-    public void onDetach() {
-        super.onDetach();
-        mListener = null;
     }
+} // class end
 
-    /**
-     * This interface must be implemented by activities that contain this
-     * fragment to allow an interaction in this fragment to be communicated
-     * to the activity and potentially other fragments contained in that
-     * activity.
-     * <p>
-     * See the Android Training lesson <a href=
-     * "http://developer.android.com/training/basics/fragments/communicating.html"
-     * >Communicating with Other Fragments</a> for more information.
-     */
-    public interface OnFragmentInteractionListener {
-        // TODO: Update argument type and name
-        void onFragmentInteraction(Uri uri);
-    }
-}
