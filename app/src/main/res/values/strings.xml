@@ -4,7 +4,14 @@
     <string name="str_light">Light</string>
     <string name="str_environment">Environment</string>
     <string name="str_movement">Movement</string>
+    <string name="str_vibration">Vibration</string>
+    <string name="str_sensor_details_title">Senor Details</string>
+    <string name="str_sensor_value_title">Sensor Values</string>
+    <string name="str_light_sensor_heading">Light Sensor Value</string>
+    <string name="str_motion_button">Detect Motion</string>
+    <string name="str_noise_button">Detect Noise</string>
+    <string name="str_noise_heard">Environmental noise is heard</string>
+    <string name="str_noise_unheard">No noise is heard</string>
 
-    <!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_blank_fragment">Hello blank fragment</string>
+
 </resources>
