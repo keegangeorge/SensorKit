@@ -85,17 +85,16 @@ public class LightFragment extends Fragment implements SensorEventListener {
 
     @Override
     public void onSensorChanged(SensorEvent event) {
+        // check for data inside light sensor and display it
         if (event.sensor.getType() == Sensor.TYPE_LIGHT) {
             lightSensorValTextView.setText(String.valueOf(event.values[0]));
 
             // play sound / toast if light sensor is fully covered
-            if (event.values[0] == 0) {
+            if(event.values[0] == 0){
                 Toast.makeText(this.getActivity(), "No Light!", Toast.LENGTH_SHORT).show();
                 Uri beep = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
-                RingtoneManager.getRingtone(getActivity().getApplicationContext(), beep);
-                if (ring != null) {
-                    ring.play();
-                }
+                Ringtone ring = RingtoneManager.getRingtone(getActivity().getApplicationContext(), beep);
+                ring.play();
             }
         }
 
